@@ -105,17 +105,13 @@ for line in lines:
     if "';\n" in line:
         state = False
 
-# 匹配外键新语句
+# 匹配主键、外键、约束新语句
 for i in range(len(lines)):
-    if "FOREIGN KEY" in lines[i - 1] or "PRIMARY KEY" in lines[i - 1]:
+    if "FOREIGN KEY" in lines[i - 1] or "PRIMARY KEY" in lines[i - 1] or "ADD CONSTRAINT" in lines[i - 1]:
         new_lines.append(lines[i - 2])
         new_lines.append(lines[i - 1])
 
-# 匹配唯一约束新语句
-for i in range(len(lines)):
-    if "ADD CONSTRAINT" in lines[i - 1] and not("PRIMARY KEY" in lines[i - 1]) :
-        new_lines.append(lines[i - 2])
-        new_lines.append(lines[i - 1])
+
 
 # 写入到输出文件
 for line in new_lines:
