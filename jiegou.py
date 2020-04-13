@@ -1,7 +1,7 @@
 import re
 
-find = open('xxbs_jiegou.sql', 'r', encoding='utf-8')
-output = open('xxbs_jiegou_out.sql', 'w+', encoding='utf-8')
+find = open('jyj_oa.sql', 'r', encoding='utf-8')
+output = open('jyj_oa_jiegou_out.sql', 'w+', encoding='utf-8')
 lines = find.readlines()
 new_lines = []
 # print(lines)
@@ -27,8 +27,13 @@ for i in range(len(lines)):
     lines[i - 1] = re.sub(r'DEFAULT NEXTVAL(.*)SS\)', ' ', lines[i - 1])
     # lines[i-1] = re.sub(r'DEFAULT NULL::CHARACTER VARYING', ' ', lines[i - 1])
     lines[i - 1] = re.sub(r'DEFAULT(.*)::CHARACTER VARYING', default_val, lines[i - 1])
-    # lines[i - 1] = re.sub(r'::CHARACTER VARYING ', ' ', lines[i - 1])
+    lines[i - 1] = re.sub(r'DEFAULT(.*)::TIMESTAMP\(6\)', default_val, lines[i - 1])
+    lines[i - 1] = re.sub(r'DEFAULT(.*)::REGCLASS', ' ', lines[i - 1])
     lines[i - 1] = re.sub(r'::BPCHAR ', ' ', lines[i - 1])
+    lines[i - 1] = re.sub(r'10000 CHAR', '1000 CHAR', lines[i - 1])
+    # lines[i - 1] = re.sub(r'::CHARACTER VARYING ', ' ', lines[i - 1])
+
+
 # BIT(1) 转化为 BIT
 for i in range(len(lines)):
     # re.sub才能够匹配正则，replace只能替换字符串
@@ -37,7 +42,7 @@ for i in range(len(lines)):
 # BYTEA 转化为 BINARY
 for i in range(len(lines)):
     # re.sub才能够匹配正则，replace只能替换字符串
-    lines[i - 1] = re.sub(r'BYTEA', 'BINARY', lines[i - 1])
+    lines[i - 1] = re.sub(r'BYTEA', 'CLOB', lines[i - 1])
 
 # #大小写转换
 # def toupper(m):
@@ -101,12 +106,16 @@ for line in lines:
         state = False
 
 # 匹配外键新语句
-
 for i in range(len(lines)):
     if "FOREIGN KEY" in lines[i - 1] or "PRIMARY KEY" in lines[i - 1]:
         new_lines.append(lines[i - 2])
         new_lines.append(lines[i - 1])
 
+# 匹配唯一约束新语句
+for i in range(len(lines)):
+    if "ADD CONSTRAINT" in lines[i - 1] and not("PRIMARY KEY" in lines[i - 1]) :
+        new_lines.append(lines[i - 2])
+        new_lines.append(lines[i - 1])
 
 # 写入到输出文件
 for line in new_lines:
